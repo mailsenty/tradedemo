@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<mule-project xmlns="http://www.mulesoft.com/tooling/project" runtimeId="org.mule.tooling.server.3.8.3.ee" schemaVersion="5.3.0.0">
+    <name>TradeDemo</name>
+    <description></description>
+    <muleExtension name="TradeEvents" qualifier="org.mule.tooling.ui.contribution.trade-events.3.5.0"/>
+    <muleExtension name="TradeLeads" qualifier="org.mule.tooling.ui.contribution.trade-leads.3.5.0"/>
+    <muleExtension name="TradeTariff" qualifier="org.mule.tooling.ui.contribution.trade-tariff.3.5.0"/>
+    <muleExtension name="BusinessServiceProviders" qualifier="org.mule.tooling.ui.contribution.business-service-providers.3.5.0"/>
+</mule-project>
