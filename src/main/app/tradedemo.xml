@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:business-service-providers="http://www.mulesoft.org/schema/mule/business-service-providers" xmlns:trade-events="http://www.mulesoft.org/schema/mule/trade-events" xmlns:trade-leads="http://www.mulesoft.org/schema/mule/trade-leads" xmlns:trade-tariff="http://www.mulesoft.org/schema/mule/trade-tariff" xmlns:tracking="http://www.mulesoft.org/schema/mule/ee/tracking" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" 
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/trade-leads http://www.mulesoft.org/schema/mule/trade-leads/current/mule-trade-leads.xsd
+http://www.mulesoft.org/schema/mule/trade-events http://www.mulesoft.org/schema/mule/trade-events/current/mule-trade-events.xsd
+http://www.mulesoft.org/schema/mule/trade-tariff http://www.mulesoft.org/schema/mule/trade-tariff/current/mule-trade-tariff.xsd
+http://www.mulesoft.org/schema/mule/business-service-providers http://www.mulesoft.org/schema/mule/business-service-providers/current/mule-business-service-providers.xsd
+http://www.mulesoft.org/schema/mule/ee/tracking http://www.mulesoft.org/schema/mule/ee/tracking/current/mule-tracking-ee.xsd">
+    <http:listener-config name="HTTP_Listener_Configuration" host="0.0.0.0" port="8081" doc:name="HTTP Listener Configuration"/>
+    <trade-events:config name="TradeEvents__Configuration" doc:name="TradeEvents: Configuration"/>
+    <trade-leads:config name="TradeLeads__Configuration" doc:name="TradeLeads: Configuration"/>
+    <trade-tariff:config name="TradeTariff__Configuration" doc:name="TradeTariff: Configuration"/>
+    <business-service-providers:config name="BusinessServiceProviders__Configuration" doc:name="BusinessServiceProviders: Configuration"/>
+    <flow name="tradeeventFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/tradeevent" allowedMethods="GET" doc:name="HTTP"/>
+        <choice doc:name="Choice">
+            <when expression="#[message.inboundProperties.'http.query.params'.method==&quot;sources&quot;]">
+                <trade-events:sources config-ref="TradeEvents__Configuration" sources="#[message.inboundProperties.'http.query.params'.sources]" doc:name="TradeEvents"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.query.params'.method==&quot;countries&quot;]">
+                <trade-events:countries config-ref="TradeEvents__Configuration" countries="#[message.inboundProperties.'http.query.params'.countries]" doc:name="TradeEvents"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.query.params'.method==&quot;query&quot;]">
+                <trade-events:query config-ref="TradeEvents__Configuration" query="#[message.inboundProperties.'http.query.params'.query]" doc:name="TradeEvents"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.query.params'.method==&quot;industries&quot;]">
+                <trade-events:industries config-ref="TradeEvents__Configuration" industries="#[message.inboundProperties.'http.query.params'.industries]" doc:name="TradeEvents"/>
+            </when>
+            <otherwise>
+                <logger message="Not a valid method" level="INFO" doc:name="Logger"/>
+            </otherwise>
+        </choice>
+    </flow>
+    <flow name="tradeleadFlow">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/tradelead" allowedMethods="GET" doc:name="HTTP"/>
+        <choice doc:name="Choice">
+            <when expression="#[message.inboundProperties.'http.query.params'.method==&quot;sources&quot;]">
+                <trade-leads:countries config-ref="TradeLeads__Configuration" doc:name="TradeLeads" countries="#[message.inboundProperties.'http.query.params'.countries]"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.query.params'.method==&quot;industries&quot;]">
+                <trade-leads:industries config-ref="TradeLeads__Configuration" doc:name="TradeLeads" industries="#[message.inboundProperties.'http.query.params'.industries]"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.query.params'.method==&quot;query&quot;]">
+                <trade-leads:query config-ref="TradeLeads__Configuration" doc:name="TradeLeads" query="#[message.inboundProperties.'http.query.params'.query]"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.query.params'.method==&quot;query&quot;]">
+                <trade-leads:trade_regions config-ref="TradeLeads__Configuration" trade_regions="#[message.inboundProperties.'http.query.params'.trade_regions]" doc:name="TradeLeads"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.query.params'.method==&quot;world_regions&quot;]">
+                <trade-leads:world_regions config-ref="TradeLeads__Configuration" world_regions="#[message.inboundProperties.'http.query.params'.world_regions]" doc:name="TradeLeads"/>
+            </when>
+            <when expression="#[message.inboundProperties.'http.query.params'.method==&quot;sources&quot;]">
+                <trade-leads:sources config-ref="TradeLeads__Configuration" sources="#[message.inboundProperties.'http.query.params'.source]" doc:name="TradeLeads"/>
+            </when>
+            <otherwise>
+                <logger message="Invalid method" level="INFO" doc:name="Logger"/>
+            </otherwise>
+        </choice>
+    </flow>
+    <flow name="tradetarrifdemo">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/tradetariff" allowedMethods="GET" doc:name="HTTP"/>
+        <trade-tariff:reporter-names config-ref="TradeTariff__Configuration" reporterNames="#[message.inboundProperties.'http.query.params'.reporter_name]" doc:name="TradeTariff"/>
+    </flow>
+    <flow name="businessservice">
+        <http:listener config-ref="HTTP_Listener_Configuration" path="/businessserv" allowedMethods="GET" doc:name="HTTP"/>
+        <business-service-providers:categories config-ref="BusinessServiceProviders__Configuration" categories="#[message.inboundProperties.'http.query.params'.categories]" doc:name="BusinessServiceProviders"/>
+    </flow>
+</mule>
